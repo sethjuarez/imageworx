@@ -1,8 +1,8 @@
 <template>
     <div>
         <div>
-            <video v-on:click="freeze()" id="video" width="320" height="240" autoplay></video>
-            <canvas v-on:click="addImage()" id="canvas" width="320" height="240"></canvas>
+            <video @click="freeze()" id="video" width="320" height="240" autoplay></video>
+            <canvas @click="addImage()" id="canvas" width="320" height="240"></canvas>
         </div>
         <div>
             <span :key="item+index" v-for="(item, index) in signs">
@@ -16,7 +16,7 @@
         </div>
         <div id="listOPics">
             <ul class="imagelist" :key="index" v-for="(item, index) in list">
-                <li class="imgitem">
+                <li class="imgitem" @click="removeImage(index)">
                     <div>{{item.type}}</div>
                     <img height="120" width="160" :src="item.image" />
                 </li>
@@ -29,6 +29,7 @@
 </template>
 
 <script>
+    import axios from 'axios'
     export default {
         name: 'Capture',
         data: function () {
@@ -61,8 +62,17 @@
                     image: c.toDataURL()
                 })
             },
-            submitImages: function () {
-                alert('made it!')
+            removeImage: function (index) {
+                this.list.splice(index, 1)
+            },
+            submitImages: async function () {
+                let url = 'http://localhost:7071/api/save'
+                let response = await axios.post(url, { items: this.list }, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                //console.log(JSON.stringify({ items: this.list }))
             }
         }
     }
@@ -75,7 +85,10 @@
     }
 
     #listOPics {
-        padding-top: 50px;
+        clear: both;
+        padding: 25px 100px;
+        text-align: center;
+        margin: 0px;
     }
 
     .imagelist {
@@ -83,7 +96,13 @@
         padding: 0px;
     }
 
+    .imgitem {
+        float: left;
+        padding: 10px;
+    }
+
     .btn {
         text-align: center;
+        clear: both;
     }
 </style>
