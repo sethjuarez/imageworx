@@ -6,37 +6,65 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
+variables:
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
 
-jobs:
-- job: imageworx_build
-  displayName: ImageWorx Client Build
-  steps:
-  - task: NodeTool@0
-    inputs:
-      versionSpec: '10.x'
-    displayName: 'Install Node.js'
+  # Working Directory
+  workingDirectory: '$(System.DefaultWorkingDirectory)/'
 
-  - script: |
-      npm install
-      npm run build
-    displayName: 'npm install and build'
+stages:
+  - stage: Build
+    displayName: Build stage
 
-  - task: ArchiveFiles@2
-    inputs:
-      rootFolderOrFile: '$(System.DefaultWorkingDirectory)/dist'
-      includeRootFolder: false
-      archiveFile: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip"
+    jobs:
+    - job: imageworx_build
+      displayName: ImageWorx Client Build
+      pool:
+        vmImage: $(vmImageName)
+      steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '10.x'
+        displayName: 'Install Node.js'
 
-  - task: PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'
+      - script: |
+          npm install
+          npm run build
+        displayName: 'npm install and build'
 
-  - task: AzureWebApp@1
-    inputs:
-      azureSubscription: '$(azureSubscription)'
-      appType: 'webAppLinux'
-      appName: '$(appName)'
-      package: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'
-      runtimeStack: 'NODE|10-lts'
+      - task: ArchiveFiles@2
+        inputs:
+          rootFolderOrFile: '$(workingDirectory)/dist'
+          includeRootFolder: false
+          archiveFile: "$(workingDirectory)/build$(Build.BuildId).zip"
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(workingDirectory)/build$(Build.BuildId).zip'
+
+- stage: Deploy
+  displayName: Deploy stage
+  dependsOn: Build
+  condition: succeeded()
+
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    environment: 'development'
+    pool:
+      vmImage: $(vmImageName)
+
+    strategy:
+      runOnce:
+        deploy:
+
+          steps:
+          - task: AzureFunctionApp@1
+            displayName: 'Azure functions app deploy'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              appType: 'webAppLinux'
+              appName: '$(appName)'
+              package: '$(workingDirectory)/build$(Build.BuildId).zip'
+              runtimeStack: 'NODE|10-lts'
