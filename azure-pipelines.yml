@@ -22,3 +22,8 @@ jobs:
       npm install
       npm run build
     displayName: 'npm install and build'
+
+  - task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+    includeRootFolder: false
