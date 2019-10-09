@@ -60,8 +60,8 @@ stages:
           deploy:
 
             steps:
-            - task: AzureFunctionApp@1
-              displayName: 'Azure functions app deploy'
+            - task: AzureWebApp@1
+              displayName: 'Azure web app deploy'
               inputs:
                 azureSubscription: '$(azureSubscription)'
                 appType: 'webAppLinux'
