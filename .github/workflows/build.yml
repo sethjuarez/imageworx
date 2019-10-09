@@ -1,0 +1,24 @@
+name: Node CI
+
+on: [push]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    # checkout the repo
+    - uses: actions/checkout@master
+    
+    # install dependencies, build, and test
+    - name: npm install, build
+      run: |
+        npm install
+        npm run build --if-present
+        
+    # deploy web app using publish profile credentials
+    #- uses: azure/actions/login@v1
+    #  with:
+    #    creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    #- run: |
+    #    az webapp list --query "[?state=='Running']"
