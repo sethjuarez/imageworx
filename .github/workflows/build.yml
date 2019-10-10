@@ -1,4 +1,4 @@
-name: Node CI
+name: imageworx ci
 
 on: [push]
 
@@ -26,6 +26,8 @@ jobs:
     - uses: azure/actions/login@v1
       with:
         creds: ${{ secrets.CREDENTIALS }}
+    - run: |
+        az login --service-principal -u 
 
     - run: |
         az webapp deployment source config-zip -g ${{ secrets.RG }} -n ${{ secrets.APP }} --src build.zip
