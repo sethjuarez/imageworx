@@ -22,8 +22,11 @@
                 </li>
             </ul>
             <div class="btn">
-                <button type="button" v-if="list.length > 0" v-on:click="submitImages()">Submit Training Data</button>
+                <button type="button" v-if="list.length > 0" v-on:click="submitImages()" v-show="!processing">Submit Training Data</button>
             </div>
+        </div>
+        <div id="notifications" v-show="processing">
+            {{message}}
         </div>
     </div>
 </template>
@@ -34,6 +37,8 @@
         name: 'Capture',
         data: function () {
             return {
+                processing: false,
+                message: '',
                 video: null,
                 canvas: null,
                 signs: ['rock', 'paper', 'scissors', 'lizard', 'spock'],
@@ -66,14 +71,17 @@
                 this.list.splice(index, 1)
             },
             submitImages: async function () {
-                console.log('Attempting push:')
+                this.processing = true
+                this.message = 'sending data'
                 let url = 'https://imageworxapi.azurewebsites.net/api/save'
                 let response = await axios.post(url, { items: this.list }, {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
+                    headers: { 'Content-Type': 'application/json' }
                 })
-                console.log(JSON.stringify(response['data']))
+                this.message = 'done!'
+                this.list = []
+                let data = response['data']
+                console.log(data)
+                this.processing = false
             }
         }
     }
@@ -90,6 +98,19 @@
         padding: 25px 100px;
         text-align: center;
         margin: 0px;
+    }
+
+    #notifications {
+        width:150px;
+        height:30px;
+        display:table-cell;
+        text-align:center;
+        background:rgb(255, 166, 0);
+        border:1px solid #000;
+        top: 10px;
+        right: 10px;
+        position: absolute;
+        padding-top: 10px;
     }
 
     .imagelist {
