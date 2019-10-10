@@ -67,13 +67,13 @@
             },
             submitImages: async function () {
                 console.log('Attempting push:')
-                let url = 'http://localhost:7071/api/save'
+                let url = 'https://imageworxapi.azurewebsites.net/api/save'
                 let response = await axios.post(url, { items: this.list }, {
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 })
-                //console.log(JSON.stringify({ items: this.list }))
+                console.log(JSON.stringify(response))
             }
         }
     }
