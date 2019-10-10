@@ -73,7 +73,7 @@
                         'Content-Type': 'application/json'
                     }
                 })
-                console.log(JSON.stringify(response))
+                console.log(JSON.stringify(response['data']))
             }
         }
     }
