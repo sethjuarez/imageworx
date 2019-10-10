@@ -66,6 +66,7 @@
                 this.list.splice(index, 1)
             },
             submitImages: async function () {
+                console.log('Attempting push:')
                 let url = 'http://localhost:7071/api/save'
                 let response = await axios.post(url, { items: this.list }, {
                     headers: {
