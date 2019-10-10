@@ -14,11 +14,18 @@ jobs:
       run: |
         npm install
         npm run build --if-present
-        
-    # deploy web app using publish profile credentials
-    #- uses: azure/actions/login@v1
-    #  with:
-    #    creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    #- run: |
-    #    az webapp list --query "[?state=='Running']"
+
+    # zip/package
+    - name: package contents
+      run: |
+        cd dist
+        zip -r build.zip *
+        cd ..
+        mv dist/build.zip .
+
+    - uses: azure/actions/login@v1
+      with:
+        creds: ${{ secrets.CREDENTIALS }}
+
+    - run: |
+        az webapp deployment source config-zip -g ${{ secrets.RG }} -n ${{ secrets.APP }} --src build.zip
