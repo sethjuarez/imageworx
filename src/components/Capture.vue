@@ -1,10 +1,6 @@
 <template>
     <div>
-        <div>
-            <video @click="freeze()" id="video" width="320" height="240" autoplay></video>
-            <canvas @click="addImage()" id="canvas" width="320" height="240"></canvas>
-        </div>
-        <div>
+        <div id="radioselection">
             <span :key="item+index" v-for="(item, index) in signs">
                 <input type="radio" :id="item" name="sign" :value="item" 
                     :checked="selectedSign == item"
@@ -12,7 +8,10 @@
                 <label :for="item">{{item}}</label>
                 &nbsp;
             </span>
-
+        </div>
+        <div>
+            <video @click="freeze()" id="video" width="320" height="240" autoplay></video>
+            <canvas @click="addImage()" id="canvas" width="320" height="240"></canvas>
         </div>
         <div id="listOPics">
             <ul class="imagelist" :key="index" v-for="(item, index) in list">
@@ -66,6 +65,7 @@
                     type: this.selectedSign,
                     image: c.toDataURL()
                 })
+                window.scrollTo(0,document.querySelector("#app").scrollHeight)
             },
             removeImage: function (index) {
                 this.list.splice(index, 1)
@@ -98,6 +98,9 @@
         padding: 25px 100px;
         text-align: center;
         margin: 0px;
+    }
+    #radioselection {
+        margin-bottom: 10px;
     }
 
     #notifications {
