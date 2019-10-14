@@ -110,7 +110,7 @@
         text-align:center;
         background:rgb(255, 166, 0);
         border:1px solid #000;
-        top: 10px;
+        bottom: 10px;
         right: 10px;
         position: absolute;
         padding-top: 10px;
