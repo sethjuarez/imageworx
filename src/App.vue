@@ -5,10 +5,9 @@
       <p><strong>Instructions</strong></p>
       <ol>
         <li>Select the appropriate gesture</li>
-        <li>Click on the video to freeze the frame you think most adequately represents the gesture</li>
-        <li>Click on the freezed frame to add to the set of images you wish to submit</li>
+        <li>Click on the video to add the frozen frame to the set of images you wish to submit</li>
         <li>Add as many images as you like!</li>
-        <li>Review the images to make sure they are correct (click on an image to remove it from the set</li>
+        <li>Review the images to make sure they are correct (click on an image in the set below the video to remove it</li>
         <li>Click <em>Submit Training Data</em> when done!</li>
         <li>REPEAT! (Pretty please)</li>
       </ol>

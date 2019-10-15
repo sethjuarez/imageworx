@@ -10,8 +10,8 @@
             </span>
         </div>
         <div>
-            <video @click="freeze()" id="video" width="320" height="240" autoplay></video>
-            <canvas @click="addImage()" id="canvas" width="320" height="240"></canvas>
+            <video @click="addImage()" id="video" width="320" height="240" autoplay></video>
+            <canvas id="canvas" width="320" height="240"></canvas>
         </div>
         <div id="listOPics">
             <ul class="imagelist" :key="index" v-for="(item, index) in list">
@@ -56,10 +56,8 @@
             }
         },
         methods: {
-            freeze: function () {
-                this.canvas.drawImage(this.video, 0, 0, 320, 240);
-            },
             addImage: function () {
+                this.canvas.drawImage(this.video, 0, 0, 320, 240);
                 let c = document.getElementById('canvas')
                 this.list.push({
                     type: this.selectedSign,
@@ -88,9 +86,13 @@
 </script>
 
 <style scoped>
-    video, canvas {
+    video {
         border: solid 1px gray;
         cursor: pointer;
+    }
+
+    canvas {
+        display: none;
     }
 
     #listOPics {
