@@ -1,11 +1,12 @@
 <template>
-    <div>
+    <div v-on:keydown="key">
         <div id="instructions">
-            <p><strong>Instructions</strong></p>
+            <p><strong>Fast Capture Instructions</strong></p>
             <ol>
-                <li>Select the appropriate gesture</li>
-                <li>Click on the video to add the frozen frame to the set of images you wish to submit</li>
-                <li>Add as many images as you like!</li>
+                <li>Select desired gesture</li>
+                <li>Get into position!</li>
+                <li>Hit spacebar to start capturing (feel free to move the gesture around)</li>
+                <li>Hit spacebar to stop capturing</li>
                 <li>Review the images to make sure they are correct (click on an image in the set below the video to remove it</li>
                 <li>Click <em>Submit Training Data</em> when done!</li>
                 <li>REPEAT! (Pretty please)</li>
@@ -27,7 +28,7 @@
             </span>
         </div>
         <div>
-            <video @click="addImage()" id="video" width="320" height="240" autoplay></video>
+            <video id="video" width="320" height="240" autoplay></video>
             <canvas id="canvas" width="320" height="240"></canvas>
         </div>
         <div id="listOPics">
@@ -49,6 +50,7 @@
 
 <script>
     import axios from 'axios'
+import { timeout } from 'q';
     export default {
         name: 'Capture',
         data: function () {
@@ -59,7 +61,8 @@
                 canvas: null,
                 signs: ['rock', 'paper', 'scissors', 'lizard', 'spock'],
                 selectedSign: 'rock',
-                list: []
+                list: [],
+                timeOut: null
             }
         },
         mounted: async function () {
@@ -73,6 +76,27 @@
             }
         },
         methods: {
+            key: function (event) {
+                if(event.keyCode == 32) {
+                    if(this.timeOut != null)
+                        this.stopCapture()
+                    else
+                        this.startCapture()
+                }
+            },
+            startCapture: function () {
+                this.stopCapture()
+                setTimeout(this.stopCapture, 60010);
+                this.timeOut = setInterval(this.addImage, 500)
+                this.video.style.border = "thick solid #FF0000";
+            },
+            stopCapture: function () {
+                if(this.timeOut != null) {
+                    clearInterval(this.timeOut);
+                    this.timeOut = null;
+                    this.video.style.border = "solid 1px gray";
+                }
+            },
             addImage: function () {
                 this.canvas.drawImage(this.video, 0, 0, 320, 240);
                 let c = document.getElementById('canvas')
@@ -80,7 +104,6 @@
                     type: this.selectedSign,
                     image: c.toDataURL()
                 })
-                window.scrollTo(0,document.querySelector("#app").scrollHeight)
             },
             removeImage: function (index) {
                 this.list.splice(index, 1)
@@ -110,7 +133,6 @@
     }
     video {
         border: solid 1px gray;
-        cursor: pointer;
     }
 
     canvas {
