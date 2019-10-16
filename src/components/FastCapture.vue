@@ -1,5 +1,5 @@
 <template>
-    <div v-on:keydown="key">
+    <div>
         <div id="instructions">
             <p><strong>Fast Capture Instructions</strong></p>
             <ol>
@@ -64,8 +64,9 @@
             }
         },
         mounted: async function () {
-            let canvas = document.getElementById('canvas');
-            this.canvas = canvas.getContext('2d');
+            document.onkeyup = this.key
+            let canvas = document.getElementById('canvas')
+            this.canvas = canvas.getContext('2d')
             this.video = document.getElementById('video')
             if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 let stream = await navigator.mediaDevices.getUserMedia({ video: true })
@@ -96,7 +97,7 @@
                 }
             },
             addImage: function () {
-                this.canvas.drawImage(this.video, 0, 0, 320, 240);
+                this.canvas.drawImage(this.video, 0, 0, 320, 240)
                 let c = document.getElementById('canvas')
                 this.list.push({
                     type: this.selectedSign,
@@ -134,6 +135,9 @@
     }
     video {
         border: solid 1px gray;
+        transform: rotateY(180deg);
+        -webkit-transform:rotateY(180deg); /* Safari and Chrome */
+        -moz-transform:rotateY(180deg); /* Firefox */
     }
 
     canvas {
