@@ -9,6 +9,7 @@
             </ol>
             <p>Also, a couple of things to note:</p>
             <ul>
+                <li>Max images that can be submitted at a time is 64 (Current count is at {{list.length}})</li>
                 <li>These images will be used to train a machine learning model for a keynote demo at Ignite</li>
                 <li>Don't submit anything you don't wish others to see</li>
                 <li><strong>PLEASE DO NOT SHARE THIS WITH ANYONE</strong></li>
@@ -31,6 +32,7 @@
         <div id="listOPics" v-if="list.length > 0">
             <div>Click on an image to remove (or <button type="button" v-on:click="clearImages()">Clear All</button>)</div>
             <div>(Also maybe clean out any images that might be ambiguous if possible)</div>
+            <div id="warning" v-if="list.length >= 64">64 Limit Reached - either submit or remove some images</div>
             <ul class="imagelist" :key="index" v-for="(item, index) in list">
                 <li class="imgitem" @click="removeImage(index)">
                     <div>{{item.type}}</div>
@@ -97,12 +99,17 @@
                 }
             },
             addImage: function () {
-                this.canvas.drawImage(this.video, 0, 0, 320, 240)
-                let c = document.getElementById('canvas')
-                this.list.push({
-                    type: this.selectedSign,
-                    image: c.toDataURL()
-                })
+                if(this.list.length <  64) {
+                    this.canvas.drawImage(this.video, 0, 0, 320, 240)
+                    let c = document.getElementById('canvas')
+                    this.list.push({
+                        type: this.selectedSign,
+                        image: c.toDataURL()
+                    })
+                } else {
+                    // reached max
+                    this.stopCapture()
+                }
             },
             removeImage: function (index) {
                 this.list.splice(index, 1)
@@ -143,7 +150,11 @@
     canvas {
         display: none;
     }
-
+    #warning {
+        color: red;
+        font-size: 16px;
+        font-weight: bold;
+    }
     #listOPics {
         clear: both;
         padding: 25px 100px;
