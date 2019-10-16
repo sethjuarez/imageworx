@@ -6,13 +6,11 @@
 </template>
 
 <script>
-import Capture from './components/Capture.vue'
 import FastCapture from './components/FastCapture.vue'
 
 export default {
   name: 'app',
   components: {
-    Capture,
     FastCapture
   }
 }

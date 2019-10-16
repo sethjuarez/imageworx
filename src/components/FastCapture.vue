@@ -5,11 +5,7 @@
             <ol>
                 <li>Select desired gesture</li>
                 <li>Get into position!</li>
-                <li>Hit spacebar to start capturing (feel free to move the gesture around)</li>
-                <li>Hit spacebar to stop capturing</li>
-                <li>Review the images to make sure they are correct (click on an image in the set below the video to remove it</li>
-                <li>Click <em>Submit Training Data</em> when done!</li>
-                <li>REPEAT! (Pretty please)</li>
+                <li>Spacebar to start</li>
             </ol>
             <p>Also, a couple of things to note:</p>
             <ul>
@@ -26,12 +22,15 @@
                 <label :for="item">{{item}}</label>
                 &nbsp;
             </span>
+            <div v-if="interval != null">Click Spacebar to Stop!</div>
         </div>
         <div>
             <video id="video" width="320" height="240" autoplay></video>
             <canvas id="canvas" width="320" height="240"></canvas>
         </div>
-        <div id="listOPics">
+        <div id="listOPics" v-if="list.length > 0">
+            <div>Click on an image to remove (or <button type="button" v-on:click="clearImages()">Clear All</button>)</div>
+            <div>(Also maybe clean out any images that might be ambiguous if possible)</div>
             <ul class="imagelist" :key="index" v-for="(item, index) in list">
                 <li class="imgitem" @click="removeImage(index)">
                     <div>{{item.type}}</div>
@@ -50,9 +49,8 @@
 
 <script>
     import axios from 'axios'
-import { timeout } from 'q';
     export default {
-        name: 'Capture',
+        name: 'FastCapture',
         data: function () {
             return {
                 processing: false,
@@ -62,7 +60,7 @@ import { timeout } from 'q';
                 signs: ['rock', 'paper', 'scissors', 'lizard', 'spock'],
                 selectedSign: 'rock',
                 list: [],
-                timeOut: null
+                interval: null
             }
         },
         mounted: async function () {
@@ -78,7 +76,7 @@ import { timeout } from 'q';
         methods: {
             key: function (event) {
                 if(event.keyCode == 32) {
-                    if(this.timeOut != null)
+                    if(this.interval != null)
                         this.stopCapture()
                     else
                         this.startCapture()
@@ -87,13 +85,13 @@ import { timeout } from 'q';
             startCapture: function () {
                 this.stopCapture()
                 setTimeout(this.stopCapture, 60010);
-                this.timeOut = setInterval(this.addImage, 500)
+                this.interval = setInterval(this.addImage, 500)
                 this.video.style.border = "thick solid #FF0000";
             },
             stopCapture: function () {
-                if(this.timeOut != null) {
-                    clearInterval(this.timeOut);
-                    this.timeOut = null;
+                if(this.interval != null) {
+                    clearInterval(this.interval);
+                    this.interval = null;
                     this.video.style.border = "solid 1px gray";
                 }
             },
@@ -107,6 +105,9 @@ import { timeout } from 'q';
             },
             removeImage: function (index) {
                 this.list.splice(index, 1)
+            },
+            clearImages: function () {
+                this.list = [];
             },
             submitImages: async function () {
                 this.processing = true
