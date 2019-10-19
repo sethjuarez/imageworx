@@ -25,9 +25,22 @@
             </span>
             <div v-if="interval != null">Click Spacebar to Stop!</div>
         </div>
-        <div>
+        <div id="images">
             <video id="video" width="320" height="240" autoplay></video>
+            <canvas id="rendered" width="224" height="224"></canvas>
             <canvas id="canvas" width="320" height="240"></canvas>
+            <div id="predictions">
+                <div id="flavor" v-if="modelmeta != null">Flavor: <strong>{{modelmeta.Flavor}}</strong></div>
+                <div id="exported" v-if="modelmeta != null"> Exported: {{modelmeta.ExportedDate}}</div>
+                <div v-if="predictions != null">
+                    <ul id="probs" :key="index" v-for="(item, index) in predictions">
+                        <li>{{item.label}}: {{item.probability.toFixed(2)}}%</li>
+                    </ul>
+                </div>
+                <div id="prediction" v-if="prediction != null">
+                    {{prediction}}
+                </div>
+            </div>
         </div>
         <div id="listOPics" v-if="list.length > 0">
             <div>Click on an image to remove (or <button type="button" v-on:click="clearImages()">Clear All</button>)</div>
@@ -51,6 +64,9 @@
 
 <script>
     import axios from 'axios'
+    import $ from 'jquery'
+    import * as tf from '@tensorflow/tfjs';
+
     export default {
         name: 'FastCapture',
         data: function () {
@@ -59,22 +75,40 @@
                 message: '',
                 video: null,
                 canvas: null,
-                signs: ['rock', 'paper', 'scissors', 'lizard', 'spock'],
-                selectedSign: 'rock',
+                signs: ['none', 'rock', 'paper', 'scissors', 'lizard', 'spock'],
+                selectedSign: 'none',
                 list: [],
-                interval: null
+                lastresponse: null,
+                interval: null,
+                model: null,
+                modelmeta: null,
+                labels: [],
+                predictions: null,
+                prediction: null,
             }
         },
         mounted: async function () {
+            // map spacebar key event
             document.onkeyup = this.key
+            // get canvas context
             let canvas = document.getElementById('canvas')
             this.canvas = canvas.getContext('2d')
+            // run and start video
             this.video = document.getElementById('video')
             if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 let stream = await navigator.mediaDevices.getUserMedia({ video: true })
                 this.video.srcObject = stream
                 this.video.play()
             }
+
+            // load model and metadata
+            this.model = await tf.loadGraphModel('model/model.json')
+            this.modelmeta = await $.getJSON('model/cvexport.manifest')
+            const l = await $.get('model/labels.txt')
+            this.labels = l.split('\r\n')
+
+            // start prediction run
+            setInterval(this.predict, 250)
         },
         methods: {
             key: function (event) {
@@ -87,15 +121,15 @@
             },
             startCapture: function () {
                 this.stopCapture()
-                setTimeout(this.stopCapture, 60010);
+                setTimeout(this.stopCapture, 60010)
                 this.interval = setInterval(this.addImage, 500)
-                this.video.style.border = "thick solid #FF0000";
+                this.video.style.border = "thick solid #FF0000"
             },
             stopCapture: function () {
                 if(this.interval != null) {
                     clearInterval(this.interval);
                     this.interval = null;
-                    this.video.style.border = "solid 1px gray";
+                    this.video.style.border = "solid 1px gray"
                 }
             },
             addImage: function () {
@@ -126,9 +160,27 @@
                 })
                 this.message = 'done!'
                 this.list = []
-                let data = response['data']
-                console.log(data)
+                this.lastresponse = response['data']
                 this.processing = false
+            },
+            predict: async function () {
+                var pic = document.getElementById('rendered')
+                var ctx = pic.getContext('2d')
+                ctx.drawImage(this.video, 0, 28, 224, 168)
+                ctx.fillRect(0, 0, 224, 28)
+                ctx.fillRect(0, 196, 224, 28)
+                var img = ctx.getImageData(0, 0, 224, 224).data
+
+                var imagedata = []
+                for(var i = 0; i < img.length; i += 4)
+                    imagedata.push(img[i], img[i+1], img[i+2])
+
+                var tensor = tf.tensor1d(imagedata).reshape([-1, 224, 224, 3])
+                var pred =  await this.model.execute({'Placeholder': tensor}).reshape([this.labels.length]).data()
+                this.prediction = this.labels[pred.indexOf(Math.max(...pred))]
+                this.predictions = []
+                for(var j = 0; j < pred.length; j++)
+                    this.predictions.push({ 'label': this.labels[j], 'probability': pred[j]*100})
             }
         }
     }
@@ -145,6 +197,24 @@
         transform: rotateY(180deg);
         -webkit-transform:rotateY(180deg); /* Safari and Chrome */
         -moz-transform:rotateY(180deg); /* Firefox */
+        float: left;
+    }
+
+    #predictions {
+        border: solid 1px gray;
+        height: 240px;
+        width: 320px;
+        margin-left: 10px;
+        float: left;
+        clear: right;
+        text-align: left;
+        padding: 0px 4px;
+    }
+
+    #images{
+        margin: 0px auto;
+        width: 662px;
+        /* border: solid 10px red;*/
     }
 
     canvas {
@@ -191,5 +261,29 @@
     .btn {
         text-align: center;
         clear: both;
+    }
+    #probs {
+        margin: 1px;
+    }
+    #probs li {
+        /*border: solid 1px black;*/
+        margin: 5px;
+    }
+
+    #prediction {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 32px;
+        color: red;
+        font-weight: bolder;
+    }
+
+    #flavor {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    #exported {
+        margin-bottom: 10px;
     }
 </style>
