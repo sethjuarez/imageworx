@@ -213,7 +213,7 @@
 
     #images{
         margin: 0px auto;
-        width: 662px;
+        width: 700px;
         /* border: solid 10px red;*/
     }
 

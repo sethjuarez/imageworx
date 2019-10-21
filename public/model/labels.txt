@@ -1,4 +1,5 @@
 lizard
+none
 paper
 rock
 scissors

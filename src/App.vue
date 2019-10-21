@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h1>rock-paper-scissors-lizard-spock (v1)</h1>
+    <h1>rock-paper-scissors-lizard-spock (v2)</h1>
     <FastCapture/>
   </div>
 </template>
