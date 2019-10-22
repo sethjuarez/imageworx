@@ -26,7 +26,7 @@
             <div v-if="interval != null">Click Spacebar to Stop!</div>
         </div>
         <div id="images">
-            <video id="video" width="320" height="240" autoplay></video>
+            <video @click="predict()" id="video" width="320" height="240" autoplay></video>
             <canvas id="rendered" width="224" height="224"></canvas>
             <canvas id="canvas" width="320" height="240"></canvas>
             <div id="predictions">
@@ -83,6 +83,10 @@
                 labels: [],
                 predictions: null,
                 prediction: null,
+                vdim: {
+                    'width': 0,
+                    'height': 0
+                }
             }
         },
         mounted: async function () {
@@ -95,8 +99,14 @@
             this.video = document.getElementById('video')
             if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 let stream = await navigator.mediaDevices.getUserMedia({ video: true })
-                this.video.srcObject = stream
-                this.video.play()
+                let tracks = stream.getVideoTracks()
+                if(tracks.length >= 1) {
+                    let settings = tracks[0].getSettings()
+                    this.vdim.width = settings.width
+                    this.vdim.height = settings.height
+                    this.video.srcObject = stream
+                    this.video.play()
+                }
             }
 
             // load model and metadata
@@ -164,16 +174,19 @@
             predict: async function () {
                 var pic = document.getElementById('rendered')
                 var ctx = pic.getContext('2d')
-                ctx.drawImage(this.video, 0, 28, 224, 168)
-                ctx.fillRect(0, 0, 224, 28)
-                ctx.fillRect(0, 196, 224, 28)
+                let xclip = (this.vdim.width - this.vdim.height) / 2
+                ctx.drawImage(this.video, xclip, 0, this.vdim.height, this.vdim.height, 0, 0, 224, 224)
                 var img = ctx.getImageData(0, 0, 224, 224).data
 
                 var imagedata = []
-                for(var i = 0; i < img.length; i += 4)
-                    imagedata.push(img[i], img[i+1], img[i+2])
+                for(var i = 0; i < img.length; i += 4) {
+                    // [RGBA] -> [BGR]
+                    // 1. Discard img[i+3] - Alpha channel
+                    // 2. Swap R/G
+                    imagedata.push(img[i+2], img[i+1], img[i])
+                }
 
-                var tensor = tf.tensor1d(imagedata).reshape([-1, 224, 224, 3])
+                var tensor = tf.tensor1d(imagedata).reshape([1, 224, 224, 3])
                 var pred =  await this.model.execute({'Placeholder': tensor}).reshape([this.labels.length]).data()
                 this.prediction = this.labels[pred.indexOf(Math.max(...pred))]
                 this.predictions = []
@@ -198,6 +211,8 @@
         float: left;
     }
 
+    
+
     #predictions {
         border: solid 1px gray;
         height: 240px;
@@ -215,7 +230,11 @@
         /* border: solid 10px red;*/
     }
 
-    canvas {
+    #rendered {
+        display: none;
+    }
+
+    #canvas {
         display: none;
     }
     #warning {
