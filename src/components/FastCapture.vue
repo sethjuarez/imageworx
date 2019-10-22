@@ -32,13 +32,11 @@
             <div id="predictions">
                 <div id="flavor" v-if="modelmeta != null">Flavor: <strong>{{modelmeta.Flavor}}</strong></div>
                 <div id="exported" v-if="modelmeta != null"> Exported: {{modelmeta.ExportedDate}}</div>
+                <div id="prediction" v-if="prediction != null">{{prediction}}</div>
                 <div v-if="predictions != null">
                     <ul id="probs" :key="index" v-for="(item, index) in predictions">
                         <li>{{item.label}}: {{item.probability.toFixed(2)}}%</li>
                     </ul>
-                </div>
-                <div id="prediction" v-if="prediction != null">
-                    {{prediction}}
                 </div>
             </div>
         </div>
@@ -272,18 +270,18 @@
 
     #prediction {
         text-align: center;
-        margin-top: 10px;
-        font-size: 32px;
+        margin: 3px;
+        font-size: 30px;
         color: red;
         font-weight: bolder;
     }
 
     #flavor {
-        margin-top: 10px;
-        margin-bottom: 10px;
+        margin-top: 5px;
+        margin-bottom: 5px;
     }
 
     #exported {
-        margin-bottom: 10px;
+        margin-bottom: 5px;
     }
 </style>
