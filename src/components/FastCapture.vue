@@ -186,12 +186,13 @@
                     imagedata.push(img[i+2], img[i+1], img[i])
                 }
 
-                var tensor = tf.tensor1d(imagedata).reshape([1, 224, 224, 3])
+                var tensor = tf.tensor1d(imagedata).reshape([-1, 224, 224, 3])
+                
                 var pred =  await this.model.execute({'Placeholder': tensor}).reshape([this.labels.length]).data()
                 this.prediction = this.labels[pred.indexOf(Math.max(...pred))]
                 this.predictions = []
                 for(var j = 0; j < pred.length; j++)
-                    this.predictions.push({ 'label': this.labels[j], 'probability': pred[j]*100})
+                    this.predictions.push({ 'label': this.labels[j], 'probability': pred[j]*100 })
             }
         }
     }
