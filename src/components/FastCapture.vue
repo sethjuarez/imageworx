@@ -86,7 +86,8 @@
                 vdim: {
                     'width': 0,
                     'height': 0
-                }
+                },
+                appSettings: ''
             }
         },
         mounted: async function () {
@@ -109,11 +110,17 @@
                 }
             }
 
-            // load model and metadata
+            // load appSettings
+            this.appSettings = await $.get('config.json')
+
+            // load model, metadata, and labels
             this.model = await tf.loadGraphModel('model/model.json')
             this.modelmeta = await $.getJSON('model/cvexport.manifest')
             const l = await $.get('model/labels.txt')
             this.labels = l.split('\n')
+            
+
+
 
             // start interval
             setInterval(this.predict, 250)
@@ -165,7 +172,7 @@
                 this.message = 'sending data'
                 // api endpoint
                 try {
-                    let url = 'https://imageworxapi.azurewebsites.net/api/save'
+                    let url = this.appSettings.saveEndpoint
                     let response = await axios.post(url, { items: this.list }, {
                         headers: { 'Content-Type': 'application/json' }
                     })
