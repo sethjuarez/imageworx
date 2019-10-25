@@ -82,7 +82,7 @@
                 modelmeta: null,
                 labels: [],
                 probabilities: [],
-                guess: null,
+                guess: 'none',
                 vdim: {
                     'width': 0,
                     'height': 0
