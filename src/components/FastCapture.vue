@@ -174,6 +174,8 @@
             predict: async function () {
                 var pic = document.getElementById('rendered')
                 var ctx = pic.getContext('2d')
+
+                // clip out edges to make square
                 let xclip = (this.vdim.width - this.vdim.height) / 2
                 ctx.drawImage(this.video, xclip, 0, this.vdim.height, this.vdim.height, 0, 0, 224, 224)
                 var img = ctx.getImageData(0, 0, 224, 224).data
@@ -188,7 +190,10 @@
 
                 var tensor = tf.tensor1d(imagedata).reshape([-1, 224, 224, 3])
                 
-                var pred =  await this.model.predict({'Placeholder': tensor}).reshape([6]).data()
+                var pred =  await this.model
+                                        .predict({'Placeholder': tensor}, {'batchSize': 1})
+                                        .reshape([6])
+                                        .data()
                 
                 this.guess = this.labels[pred.indexOf(Math.max(...pred))]
                 this.probabilities = []
