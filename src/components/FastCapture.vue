@@ -31,12 +31,12 @@
             <canvas id="canvas" width="320" height="240"></canvas>
             <div id="output">
                 <div id="prediction">{{guess}}</div>
+                <div>&nbsp;</div>
                 <div id="plist">
                     <ul :key="idx" v-for="(pitem, idx) in probabilities">
                         <li>{{pitem.label}}: {{pitem.probability.toFixed(2)}}%</li>
                     </ul>
                 </div>
-                 <div id="flavor" v-if="modelmeta != null">Flavor: <strong>{{modelmeta.Flavor}}</strong></div>
                 <div id="exported" v-if="modelmeta != null">Exported: {{modelmeta.ExportedDate}}</div>
             </div>
         </div>
