@@ -116,7 +116,7 @@
             this.labels = l.split('\n')
 
             // start interval
-            setInterval(this.predict, 500)
+            setInterval(this.predict, 250)
         },
         methods: {
             key: function (event) {
