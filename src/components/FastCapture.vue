@@ -29,12 +29,12 @@
             <video @click="predict()" id="video" width="320" height="240" autoplay></video>
             <canvas id="rendered" width="224" height="224"></canvas>
             <canvas id="canvas" width="320" height="240"></canvas>
-            <div id="predictions">
+            <div id="output">
                 <div id="flavor" v-if="modelmeta != null">Flavor: <strong>{{modelmeta.Flavor}}</strong></div>
                 <div id="exported" v-if="modelmeta != null"> Exported: {{modelmeta.ExportedDate}}</div>
-                <div id="prediction" v-if="prediction != null">{{prediction}}</div>
-                <div v-if="predictions != null">
-                    <ul id="probs" :key="index" v-for="(item, index) in predictions">
+                <div id="prediction" v-if="guess != null">{{guess}}</div>
+                <div v-if="probabilities != null">
+                    <ul id="probs" :key="index" v-for="(item, index) in probabilities">
                         <li>{{item.label}}: {{item.probability.toFixed(2)}}%</li>
                     </ul>
                 </div>
@@ -81,8 +81,8 @@
                 model: null,
                 modelmeta: null,
                 labels: [],
-                predictions: null,
-                prediction: null,
+                probabilities: null,
+                guess: null,
                 vdim: {
                     'width': 0,
                     'height': 0
@@ -190,10 +190,10 @@
                 
                 var pred =  await this.model.predict({'Placeholder': tensor}).reshape([6]).data()
                 
-                this.prediction = this.labels[pred.indexOf(Math.max(...pred))]
-                this.predictions = []
+                this.guess = this.labels[pred.indexOf(Math.max(...pred))]
+                this.probabilities = []
                 for(var j = 0; j < pred.length; j++)
-                    this.predictions.push({ 'label': this.labels[j], 'probability': pred[j]*100 })
+                    this.probabilities.push({ 'label': this.labels[j], 'probability': pred[j]*100 })
             }
         }
     }
@@ -213,9 +213,7 @@
         float: left;
     }
 
-    
-
-    #predictions {
+    #output {
         border: solid 1px gray;
         height: 240px;
         width: 320px;
