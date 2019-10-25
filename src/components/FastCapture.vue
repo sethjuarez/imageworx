@@ -162,6 +162,7 @@
             submitImages: async function () {
                 this.processing = true
                 this.message = 'sending data'
+                // api endpoint
                 let url = 'https://imageworxapi.azurewebsites.net/api/save'
                 let response = await axios.post(url, { items: this.list }, {
                     headers: { 'Content-Type': 'application/json' }
