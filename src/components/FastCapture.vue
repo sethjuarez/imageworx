@@ -23,7 +23,6 @@
                 <label :for="item">{{item}}</label>
                 &nbsp;
             </span>
-            <div id="prediction">{{guess}}</div>
             <div v-if="interval != null">Click Spacebar to Stop!</div>
         </div>
         <div id="images">
@@ -33,13 +32,12 @@
             <div id="output">
                 <div id="flavor" v-if="modelmeta != null">Type: {{modelmeta.Flavor}}</div>
                 <div id="exported" v-if="modelmeta != null">Exported: {{modelmeta.ExportedDate}}</div>
+                <div id="current">{{guess}}</div>
                 <div id="plist">
-                    <div>Probabilities:</div>
-                    <ul :key="idx" v-for="(pitem, idx) in probabilities">
-                        <li>{{pitem.label}}: {{pitem.probability.toFixed(2)}}%</li>
+                    <ul>
+                        <li :key="idx" v-for="(pitem, idx) in probabilities">{{pitem.label}}: {{pitem.probability.toFixed(2)}}%</li>
                     </ul>
                 </div>
-                
             </div>
         </div>
         <div id="listOPics" v-if="list.length > 0">
@@ -115,10 +113,10 @@
             this.model = await tf.loadGraphModel('model/model.json')
             this.modelmeta = await $.getJSON('model/cvexport.manifest')
             const l = await $.get('model/labels.txt')
-            this.labels = l.split('\r\n')
+            this.labels = l.split('\n')
 
             // start interval
-            setInterval(this.predict, 250)
+            setInterval(this.predict, 500)
         },
         methods: {
             key: function (event) {
@@ -294,7 +292,7 @@
         margin: 5px;
     }
 
-    #prediction {
+    #current {
         text-align: center;
         margin: 3px;
         font-size: 30px;
