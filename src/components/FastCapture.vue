@@ -31,11 +31,11 @@
             <canvas id="canvas" width="320" height="240"></canvas>
             <div id="output">
                 <div id="flavor" v-if="modelmeta != null">Flavor: <strong>{{modelmeta.Flavor}}</strong></div>
-                <div id="exported" v-if="modelmeta != null"> Exported: {{modelmeta.ExportedDate}}</div>
-                <div id="prediction" v-if="guess != null">{{guess}}</div>
-                <div v-if="probabilities != null">
-                    <ul id="probs" :key="index" v-for="(item, index) in probabilities">
-                        <li>{{item.label}}: {{item.probability.toFixed(2)}}%</li>
+                <div id="exported" v-if="modelmeta != null">Exported: {{modelmeta.ExportedDate}}</div>
+                <div id="prediction">{{guess}}</div>
+                <div id="plist">
+                    <ul :key="idx" v-for="(pitem, idx) in probabilities">
+                        <li>{{pitem.label}}: {{pitem.probability.toFixed(2)}}%</li>
                     </ul>
                 </div>
             </div>
@@ -81,7 +81,7 @@
                 model: null,
                 modelmeta: null,
                 labels: [],
-                probabilities: null,
+                probabilities: [],
                 guess: null,
                 vdim: {
                     'width': 0,
@@ -284,10 +284,10 @@
         text-align: center;
         clear: both;
     }
-    #probs {
+    #plist ul {
         margin: 1px;
     }
-    #probs li {
+    #plist li {
         /*border: solid 1px black;*/
         margin: 5px;
     }
