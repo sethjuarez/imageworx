@@ -157,20 +157,26 @@
                 this.list.splice(index, 1)
             },
             clearImages: function () {
-                this.list = [];
+                this.list = []
+                this.processing = false
             },
             submitImages: async function () {
                 this.processing = true
                 this.message = 'sending data'
                 // api endpoint
-                let url = 'https://imageworxapi.azurewebsites.net/api/save'
-                let response = await axios.post(url, { items: this.list }, {
-                    headers: { 'Content-Type': 'application/json' }
-                })
-                this.message = 'done!'
-                this.list = []
-                this.lastresponse = response['data']
-                this.processing = false
+                try {
+                    let url = 'https://imageworxapi.azurewebsites.net/api/save'
+                    let response = await axios.post(url, { items: this.list }, {
+                        headers: { 'Content-Type': 'application/json' }
+                    })
+                    this.message = 'done!'
+                    this.list = []
+                    this.lastresponse = response['data']
+                    this.processing = false
+                } catch(error) {
+                    // uh oh - log error and reset
+                    this.processing = false
+                }
             },
             predict: async function () {
                 var pic = document.getElementById('rendered')
