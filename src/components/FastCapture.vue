@@ -188,7 +188,8 @@
 
                 var tensor = tf.tensor1d(imagedata).reshape([-1, 224, 224, 3])
                 
-                var pred =  await this.model.execute({'Placeholder': tensor}).reshape([this.labels.length]).data()
+                var pred =  await this.model.predict({'Placeholder': tensor}).reshape([6]).data()
+                
                 this.prediction = this.labels[pred.indexOf(Math.max(...pred))]
                 this.predictions = []
                 for(var j = 0; j < pred.length; j++)
