@@ -23,6 +23,7 @@
                 <label :for="item">{{item}}</label>
                 &nbsp;
             </span>
+            <div id="prediction">{{guess}}</div>
             <div v-if="interval != null">Click Spacebar to Stop!</div>
         </div>
         <div id="images">
@@ -30,14 +31,15 @@
             <canvas id="rendered" width="224" height="224"></canvas>
             <canvas id="canvas" width="320" height="240"></canvas>
             <div id="output">
-                <div id="prediction">{{guess}}</div>
-                <div>&nbsp;</div>
+                <div id="flavor" v-if="modelmeta != null">Type: {{modelmeta.Flavor}}</div>
+                <div id="exported" v-if="modelmeta != null">Exported: {{modelmeta.ExportedDate}}</div>
                 <div id="plist">
+                    <div>Probabilities:</div>
                     <ul :key="idx" v-for="(pitem, idx) in probabilities">
                         <li>{{pitem.label}}: {{pitem.probability.toFixed(2)}}%</li>
                     </ul>
                 </div>
-                <div id="exported" v-if="modelmeta != null">Exported: {{modelmeta.ExportedDate}}</div>
+                
             </div>
         </div>
         <div id="listOPics" v-if="list.length > 0">
