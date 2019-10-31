@@ -118,7 +118,9 @@
             // load metadata and labels
             this.modelmeta = await $.getJSON('model/cvexport.manifest')
             const l = await $.get('model/labels.txt')
-            this.labels = l.split('\n')
+            this.labels = l.split('\n').map(e => {
+                return e.trim()
+            })
             
             // start interval
             setInterval(this.predict, 500)
