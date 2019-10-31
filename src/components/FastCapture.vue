@@ -63,7 +63,7 @@
 <script>
     import axios from 'axios'
     import $ from 'jquery'
-    import * as tf from '@tensorflow/tfjs';
+    import * as cvstfjs from 'customvision-tfjs'
 
     export default {
         name: 'FastCapture',
@@ -87,7 +87,8 @@
                     'width': 0,
                     'height': 0
                 },
-                appSettings: ''
+                appSettings: '',
+                result: null
             }
         },
         mounted: async function () {
@@ -114,18 +115,32 @@
             this.appSettings = await $.get('config.json')
 
             // load model, metadata, and labels
-            this.model = await tf.loadGraphModel('model/model.json')
+            this.model = new cvstfjs.ClassificationModel()
+            await this.model.loadModelAsync('model/model.json')
             this.modelmeta = await $.getJSON('model/cvexport.manifest')
             const l = await $.get('model/labels.txt')
             this.labels = l.split('\n')
             
-
-
-
             // start interval
             setInterval(this.predict, 250)
         },
         methods: {
+            predict: async function () {
+                // draw video image on canvas
+                var pic = document.getElementById('rendered')
+                var ctx = pic.getContext('2d')
+                ctx.drawImage(this.video, 0, 0, 320, 240)
+
+                // run prediction
+                const prediction = await this.model.executeAsync(pic)
+                let pred = prediction[0]
+
+                // get label and populate probabilities
+                this.guess = this.labels[pred.indexOf(Math.max(...pred))]
+                this.probabilities = []
+                for(var j = 0; j < pred.length; j++)
+                    this.probabilities.push({ 'label': this.labels[j], 'probability': pred[j]*100 })
+            },
             key: function (event) {
                 if(event.keyCode == 32) {
                     if(this.interval != null)
@@ -184,35 +199,6 @@
                     // uh oh - log error and reset
                     this.processing = false
                 }
-            },
-            predict: async function () {
-                var pic = document.getElementById('rendered')
-                var ctx = pic.getContext('2d')
-
-                // clip out edges to make square
-                let xclip = (this.vdim.width - this.vdim.height) / 2
-                ctx.drawImage(this.video, xclip, 0, this.vdim.height, this.vdim.height, 0, 0, 224, 224)
-                var img = ctx.getImageData(0, 0, 224, 224).data
-
-                var imagedata = []
-                for(var i = 0; i < img.length; i += 4) {
-                    // [RGBA] -> [BGR]
-                    // 1. Discard img[i+3] - Alpha channel
-                    // 2. Swap R/G
-                    imagedata.push(img[i+2], img[i+1], img[i])
-                }
-
-                var tensor = tf.tensor1d(imagedata).reshape([-1, 224, 224, 3])
-                
-                var pred =  await this.model
-                                        .predict({'Placeholder': tensor}, {'batchSize': 1})
-                                        .reshape([6])
-                                        .data()
-                
-                this.guess = this.labels[pred.indexOf(Math.max(...pred))]
-                this.probabilities = []
-                for(var j = 0; j < pred.length; j++)
-                    this.probabilities.push({ 'label': this.labels[j], 'probability': pred[j]*100 })
             }
         }
     }
