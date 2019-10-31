@@ -1,7 +1,7 @@
 <template>
     <div>
         <div id="instructions">
-            <p><strong>Fast Capture Instructions</strong></p>
+            <p><strong>Capture Instructions</strong></p>
             <ol>
                 <li>Select desired gesture</li>
                 <li>Get into position!</li>
@@ -10,13 +10,12 @@
             <p>Also, a couple of things to note:</p>
             <ul>
                 <li>Max images that can be submitted at a time is 64 (Current count is at {{list.length}})</li>
-                <li>These images will be used to train a machine learning model for a keynote demo at Ignite</li>
+                <li>These images will be used to train a machine learning model (this means you're ok with what you submit).</li>
                 <li>Don't submit anything you don't wish others to see</li>
-                <li><strong>PLEASE DO NOT SHARE THIS WITH ANYONE</strong></li>
             </ul>
         </div>
         <div id="radioselection">
-            <span :key="item+index" v-for="(item, index) in signs">
+            <span :key="item+index" v-for="(item, index) in labels">
                 <input type="radio" :id="item" name="sign" :value="item" 
                     :checked="selectedSign == item"
                     v-model="selectedSign">
@@ -66,14 +65,13 @@
     import * as cvstfjs from 'customvision-tfjs'
 
     export default {
-        name: 'FastCapture',
+        name: 'Capture',
         data: function () {
             return {
                 processing: false,
                 message: '',
                 video: null,
                 canvas: null,
-                signs: ['none', 'rock', 'paper', 'scissors', 'lizard', 'spock'],
                 selectedSign: 'none',
                 list: [],
                 lastresponse: null,
@@ -87,8 +85,7 @@
                     'width': 0,
                     'height': 0
                 },
-                appSettings: '',
-                result: null
+                appSettings: ''
             }
         },
         mounted: async function () {
@@ -114,15 +111,17 @@
             // load appSettings
             this.appSettings = await $.get('config.json')
 
-            // load model, metadata, and labels
+            // load model
             this.model = new cvstfjs.ClassificationModel()
             await this.model.loadModelAsync('model/model.json')
+
+            // load metadata and labels
             this.modelmeta = await $.getJSON('model/cvexport.manifest')
             const l = await $.get('model/labels.txt')
             this.labels = l.split('\n')
             
             // start interval
-            setInterval(this.predict, 250)
+            setInterval(this.predict, 500)
         },
         methods: {
             predict: async function () {
@@ -137,9 +136,9 @@
 
                 // get label and populate probabilities
                 this.guess = this.labels[pred.indexOf(Math.max(...pred))]
-                this.probabilities = []
-                for(var j = 0; j < pred.length; j++)
-                    this.probabilities.push({ 'label': this.labels[j], 'probability': pred[j]*100 })
+                this.probabilities = pred.map((e, i) => { 
+                    return { 'label': this.labels[i], 'probability': e*100 }
+                })
             },
             key: function (event) {
                 if(event.keyCode == 32) {

@@ -1,17 +1,17 @@
 <template>
   <div id="app">
-    <h1>rock-paper-scissors-lizard-spock (v3)</h1>
-    <FastCapture/>
+    <h1>rock-paper-scissors-lizard-spock (v4)</h1>
+    <Capture/>
   </div>
 </template>
 
 <script>
-import FastCapture from './components/FastCapture.vue'
+import Capture from './components/Capture.vue'
 
 export default {
   name: 'app',
   components: {
-    FastCapture
+    Capture
   }
 }
 </script>
