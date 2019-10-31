@@ -1,3 +1,4 @@
 {
-    "saveEndpoint": "https://imageworxapi.azurewebsites.net/api/save"
+    "saveEndpoint": "https://imageworxapi.azurewebsites.net/api/save",
+    "maxSubmitCount": 4
 }

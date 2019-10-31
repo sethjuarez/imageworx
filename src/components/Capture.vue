@@ -189,15 +189,21 @@
                 // api endpoint
                 try {
                     let url = this.appSettings.saveEndpoint
-                    let response = await axios.post(url, { items: this.list }, {
-                        headers: { 'Content-Type': 'application/json' }
-                    })
+                    let max_submit = this.appSettings.maxSubmitCount
+
+                    for(let i = 0; i < this.list.length; i+=max_submit) {
+                        let response = await axios.post(url, { items: this.list.slice(i, i+max_submit) }, {
+                            headers: { 'Content-Type': 'application/json' }
+                        })
+                        this.lastresponse = response['data']
+                    }
+                    
                     this.message = 'done!'
                     this.list = []
-                    this.lastresponse = response['data']
                     this.processing = false
                 } catch(error) {
                     // uh oh - log error and reset
+                    console.log(error)
                     this.processing = false
                 }
             }
